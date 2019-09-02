@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Calculator | Bembem</title>
+	<meta charset="UTF-8">
+	<meta name="description" content="CChub Calculator Challenge.">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans|Roboto&display=swap');
+        body, main, html, footer{
+            display: flex;
+            flex-wrap: wrap;
+        }
+        html{
+            background: cadetblue;
+        }
+        body{
+            width: 100%;
+            max-width: 300px;
+            margin: 10% auto;
+        }
+        #container{
+            width: 100%;
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            background: rgba(250,250,250,0.7);
+            padding: 10px;
+            border-radius: 0 0 5% 5%;
+        }
+        button, input{
+            font-family: 'Roboto', sans-serif;
+        }
+        button{
+            padding: 25%;
+            margin: 0.5px;
+            border: 0;
+            background: #f2f2f2;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        input{
+            width: 100%;
+            font-size: 1.6em;
+            border: 0;
+            text-align: right;
+            padding: 0.2em;
+        }
+        footer, input#answer{
+            font-family: 'Open Sans', sans-serif;
+        }
+        input#answer{
+            font-size: 1.5em;
+            align-content: center;
+            font-weight: bold;
+        }
+        footer{
+            width: 100%;
+            padding: 20px;
+        }
+        p#footer-text {
+            margin: auto;
+            text-align: center;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+	<main>
+        <input id="valueInput" type="text" autofocus>
+        <input type="text" id="answer" readonly>
+        <div id="container">
+            <button class="number 1">1</button>
+            <button class="number 2">2</button>
+            <button class="number 3">3</button>
+            <button class="expresion +">+</button>
+            <button class="number 4">4</button>
+            <button class="number 5">5</button>
+            <button class="number 6">6</button>
+            <button class="expresion -">-</button>
+            <button class="number 7">7</button>
+            <button class="number 8">8</button>
+            <button class="number 9">9</button>
+            <button class="expresion x">*</button>
+            <button class="number decimal">.</button>
+            <button class="number 0">0</button>
+            <button class="expresion =">=</button>
+            <button class="expresion /">/</button>
+            <button class="expresion clear">Clear</button>
+            <button class="expresion backSpace">Del</button>
+        </div>
+	</main>
+	<footer>
+		<p id="footer-text">Made with ❤️ by Bembem</p>
+    </footer>
+    <script>
+        const smartInput = (event) =>{
+            // console.log('hh', event.key);
+            if(/[0-9+*/.-]/g.test(event.key)){
+                if(/[+*/.-]/g.test(event.key)){
+                    let inputTxt  = document.getElementById('valueInput').value;
+                    const delimiter = ['*', '+', '-', '/'];
+                    const lastChar = inputTxt[inputTxt.length - 1];
+                    // console.log('lastChar', lastChar);
+                    const isDelimiter = delimiter.find(item => item === lastChar); 
+                    if(isDelimiter != undefined || isDelimiter != null){
+                        event.preventDefault();
+                    }
+                }
+                // console.log('smart', event.key); 
+            } else if(event.key == 'Enter'){
+                getInputValues();
+            } else if(event.key == 'Backspace' || event.key == 'ArrowUp' || event.key == 'ArrowDown' || event.key == 'ArrowLeft' || event.key == 'ArrowRight'){
+                // backSpace();
+            } else{
+                event.preventDefault();
+            }
+        }
+
+        const btnSmartInput = (btn) =>{
+            // console.log(btnValue.innerHTML);
+            let inputTxt  = document.getElementById('valueInput');
+            btnValue = btn.innerHTML;
+            if ( btnValue == '/' || btnValue == '*' || btnValue == '+' || btnValue == '-'){
+                // console.log('btnValue', btnValue);
+                const delimiter = ['*', '+', '-', '/'];
+                const yu = inputTxt.value;
+                // console.log('u', yu);
+                const lastChar = yu[yu.length-1];
+                // console.log('lastChar', lastChar);
+                const isDelimiter = delimiter.find(item => item === lastChar); 
+                if(isDelimiter == undefined || isDelimiter == null){
+                    inputTxt.value += btnValue;
+                }
+            } else if(btnValue == '='){
+                getInputValues();
+            } else if(btnValue.toLowerCase() == 'clear'){
+                inputTxt.value = '';
+            } else if(btnValue == 'Del'){
+                backSpace();
+            } else{
+                inputTxt.value += btnValue;
+            }
+        }
+
+        const getInputValues = () =>{
+            const input = document.getElementById('valueInput').value;
+            if(input != null){
+                const numbInput = [];
+                const symInput = [];
+                const delimiter = ['*', '+', '-', '/'];
+                var formalPosition = 0;
+                for(let i = 0; i<input.length; i++){
+                    const y = delimiter.find(item => item === input[i]); 
+                    // console.log('y',y);
+                    if(y != undefined || y != null){
+                        symInput.push(y);
+                        const num = input.slice(formalPosition,i);
+                        // console.log(num);
+                        numbInput.push(num);
+                        formalPosition = i+1;
+                    }
+                }
+                //Add the last item
+                const lastEle = input.slice(formalPosition);
+                const checkLast = delimiter.find(item => item === lastEle);
+                if(lastEle.trim() != ""){
+                    if(checkLast == undefined || checkLast == null){ 
+                        // console.log('last no', lastEle);
+                        numbInput.push(lastEle);
+                        // console.log('numb', numbInput);
+                        // console.log('sym', symInput);
+                    }
+                }
+                compute(numbInput, symInput);
+            }
+        }
+
+        const compute = (numbInput, symInput) => {
+            let answer = Number(numbInput[0]);
+            // console.log('answer', answer);
+            for (let i = 1; i < numbInput.length; i++) {
+                const element = Number(numbInput[i]);
+                // console.log('Elem', element);
+                answer = evaluateInputs(answer, element, symInput[i - 1]);
+                // console.log('Ans',answer);
+            }
+            const inputAns = document.getElementById('answer');
+            inputAns.value = answer;
+        }
+
+        const evaluateInputs = (answer, values, expression) =>{
+            if(expression){
+                let total = 0;
+                let evaluatedValues = [answer, values];
+                // console.log('evaluatedValues', evaluatedValues, 'exp', expression);
+
+                switch (expression) {
+                    case '+':
+                        total = answer + values;
+                        break;
+                    case '-':
+                        total = answer - values;
+                        break;
+                    case '/':
+                        total = answer / values;
+                        break;
+                    case '*':
+                        total = answer * values;
+                        break;
+                }
+
+                return total;
+            }
+        }
+
+        const backSpace = () =>{
+            // event
+            const inputTxt = document.getElementById('valueInput');
+            if (inputTxt.value) {
+                const curPos = inputTxt.selectionStart;
+                // console.log('curPos', curPos);
+                const txt = inputTxt.value;
+                let txtArr = txt.split('');
+                // console.log('txtOld', txtArr);
+                txtArr.splice(curPos-1, 1);
+                // console.log('txtNew', txtArr);
+                const txtVal = txtArr.join('');
+                // console.log('txtVal', txtVal);
+                inputTxt.value = txtVal;
+            }
+        }
+        
+        const startApp = () => {
+            const inputTxt = document.getElementById('valueInput');
+            const btnBkp = document.querySelector('button.expresion.backSpace');
+            inputTxt.addEventListener('keydown', function(event){
+                // console.log('clicked', event.key);
+                smartInput(event);
+            });
+            const btns = document.querySelectorAll('button');
+            btns.forEach(btn=>btn.addEventListener('click', function(){
+                // smartInput(btn.innerHTML);
+                btnSmartInput(btn);
+            }));
+        }
+        startApp();
+    </script>
+</body>
+</html>
